@@ -106,34 +106,31 @@ def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
     if not token or not sauce:
         print("التوكن أو السورس غير صالح.")
         return
-        
-    cookie_header = '; '.join([f"{cookie['name']}={cookie['value']}" for cookie in cookies])
+
+    # دمج الكوكيز في الهيدر
+    cookie_header = f"sid={sid}; sn={sn}; nm={nm}; sess={sess}; sess2={sess2}"
+    
     # بناء الهيدرز
-headers = {
-    'Accept': 'application/json; charset=utf-8',
-    'Accept-Encoding': 'gzip, deflate, br, zstd',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'Content-Type': 'application/json; charset=utf-8',
-    'Authorization': f'Bearer {token}',
-    'X-Imvu-Application': 'next_desktop/1',
-    'X-Imvu-Sauce': sauce,
-    'Cookie': cookie_header,  # تضمين جميع الكوكيز هنا
-    'Origin': 'https://www.imvu.com',
-    'Referer': 'https://www.imvu.com/next/av/L7AJ/',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
-    'Access-Control-Request-Headers': 'content-type,x-imvu-application,x-imvu-sauce',
-    'Access-Control-Request-Method': 'POST',
-    'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Allow-Origin': 'https://www.imvu.com'
-}
+    headers = {
+        'Accept': 'application/json; charset=utf-8',
+        'Accept-Encoding': 'gzip, deflate, br, zstd',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': f'Bearer {token}',
+        'X-Imvu-Application': 'next_desktop/1',
+        'X-Imvu-Sauce': sauce,
+        'Cookie': cookie_header,
+        'Origin': 'https://www.imvu.com',
+        'Referer': 'https://www.imvu.com/next/av/L7AJ/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
+    }
 
-# الآن يمكنك متابعة المستخدم باستخدام الكوكيز الجديدة في الهيدر
-response = requests.post(url, headers=headers, json=data)
-
+    # بيانات الطلب
     data = {
         "id": f"https://api.imvu.com/profile/{user_to_follow}"
     }
 
+    # URL طلب المتابعة
     url = "https://api.imvu.com/profile/profile-user-376547310/subscriptions?limit=50"
 
     # إرسال طلب متابعة المستخدم
