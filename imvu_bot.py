@@ -39,11 +39,14 @@ def login(username, password):
 
     if response.status_code == 201:
         # طباعة الاستجابة الكاملة للتحقق من تنسيق البيانات
-        print("استجابة تسجيل الدخول:", response.json())
-        
         response_json = response.json()
-        sauce = response_json.get("denormalized", {}).get("data", {}).get("sauce")
-        token = response_json.get("id")  # أو قم باستخراج التوكن بالطريقة المناسبة حسب الاستجابة
+        print("استجابة تسجيل الدخول:", response_json)
+
+        # استخراج الـ sauce والتوكن من المسار الصحيح
+        login_id = response_json.get("id")
+        sauce = response_json.get("denormalized", {}).get(login_id, {}).get("data", {}).get("sauce")
+        token = login_id  # التوكن هو الرابط الموجود في "id"
+        
         if sauce and token:
             print("تم تسجيل الدخول بنجاح")
             return token, sauce
