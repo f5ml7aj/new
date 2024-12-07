@@ -49,16 +49,24 @@ def login_and_get_token(username, password):
     # التحقق من الاستجابة
     if response.status_code in [200, 201]:
         try:
-            # استخراج التوكن (sauce) من الاستجابة
+            # استخراج التوكن من "denormalized"
             response_data = response.json()
-            # نبحث في "denormalized" للحصول على "sauce"
-            sauce = response_data["denormalized"].get("https://api.imvu.com/login", {}).get("data", {}).get("sauce")
-            if sauce:
-                save_token(sauce)  # حفظ التوكن بعد تسجيل الدخول
-                print("تم تسجيل الدخول بنجاح وحفظ التوكن")
-                return sauce
+            denormalized_data = response_data.get("denormalized", {})
+            
+            # إذا كان هناك بيانات في "denormalized"
+            if denormalized_data:
+                # استخراج التوكن (sauce) من البيانات
+                sauce = denormalized_data.get("https://api.imvu.com/login", {}).get("data", {}).get("sauce")
+                
+                if sauce:
+                    save_token(sauce)  # حفظ التوكن بعد تسجيل الدخول
+                    print("تم تسجيل الدخول بنجاح وحفظ التوكن")
+                    return sauce
+                else:
+                    print("لم يتم العثور على التوكن (sauce) في الاستجابة")
+                    return None
             else:
-                print("لم يتم العثور على التوكن في الاستجابة (sauce)")
+                print("لم يتم العثور على بيانات denormalized في الاستجابة")
                 return None
         except ValueError:
             print("حدث خطأ أثناء قراءة الاستجابة كـ JSON")
