@@ -46,7 +46,8 @@ def login_and_get_token(username, password):
     # طباعة الاستجابة كاملة لتشخيص الخطأ
     print("استجابة تسجيل الدخول:", response.text)
 
-    if response.status_code == 200:
+    # تعديل شرط التحقق ليشمل كلا من 200 و 201
+    if response.status_code in [200, 201]:
         # استخراج التوكن من الاستجابة إذا كان موجودًا
         try:
             token = response.json().get("token")
