@@ -74,9 +74,9 @@ def get_cookies_from_page(url, headers):
         print("فشل في الحصول على الكوكيز")
         return None
 
-def follow_user(user_to_follow, token, sauce, cookies):
+def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
     """
-    عملية متابعة مستخدم مع استخدام الكوكيز المستخرجة.
+    دالة متابعة مستخدم مع معطيات إضافية مثل الـ session و الـ sid و الـ sn.
     """
     if not token or not sauce:
         print("التوكن أو السورس غير صالح.")
@@ -88,10 +88,10 @@ def follow_user(user_to_follow, token, sauce, cookies):
         'Accept-Encoding': 'gzip, deflate, br, zstd',
         'Accept-Language': 'en-US,en;q=0.5',
         'Content-Type': 'application/json; charset=utf-8',
-        'Authorization': f'Bearer {denormalized}',
+        'Authorization': f'Bearer {token}',
         'X-Imvu-Application': 'next_desktop/1',
         'X-Imvu-Sauce': sauce,
-        'Cookie': '; '.join([f'{key}={value}' for key, value in cookies.items()]),  # إضافة الكوكيز المستخرجة
+        'Cookie': f"sid={sid}; sn={sn}; nm={nm}; sess={sess}; sess2={sess2}",  # إضافة الكوكيز المستخرجة هنا
         'Origin': 'https://www.imvu.com',
         'Referer': 'https://www.imvu.com/next/av/L7AJ/',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
