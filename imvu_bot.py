@@ -36,8 +36,8 @@ HEADERS = {
 
 # بيانات تسجيل الدخول
 payload = {
-    "username": "<USER>",
-    "password": "<PASS>",
+    "username": "conq1@gmail.com",
+    "password": "Moammedmax2",
     "gdpr_cookie_acceptance": False,
 }
 
