@@ -11,66 +11,90 @@ import requests
 import json
 
 # تحديد المتغيرات الأساسية
-BASE_URL_LOGIN = "https://api.imvu.com/login"
-BASE_URL_SUBSCRIPTIONS = "https://api.imvu.com/profile/profile-user-376547310/subscriptions?limit=50"
-BASE_URL_FOLLOW = "https://api.imvu.com/profile/profile-user-376547310/subscriptions/profile-user-352763477?limit=50"  # مثال على متابعة الحساب
+import requests
+import json
 
-HEADERS = {
-    "Host": "api.imvu.com",
-    "Connection": "keep-alive",
-    "sec-ch-ua": '"Google Chrome";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
-    "Accept": "application/json; charset=utf-8",
-    "Content-Type": "application/json; charset=UTF-8",
-    "sec-ch-ua-mobile": "?0",
-    "X-imvu-application": "welcome/1",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0",
-    "sec-ch-ua-platform": '"Windows"',
-    "Origin": "https://pt.secure.imvu.com",
-    "Sec-Fetch-Site": "same-site",
-    "Sec-Fetch-Mode": "cors",
-    "Sec-Fetch-Dest": "empty",
-    "Referer": "https://pt.secure.imvu.com/",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-}
+# دالة لحفظ التوكن في ملف
+def save_token(token):
+    with open('token.json', 'w') as file:
+        json.dump({"token": token}, file)
 
-# بيانات تسجيل الدخول
-payload = {
-    "username": "conq1@gmail.com",
-    "password": "Moammedmax2",
-    "gdpr_cookie_acceptance": False,
-}
-
-# إرسال طلب تسجيل الدخول
-login_response = requests.post(BASE_URL_LOGIN, headers=HEADERS, data=json.dumps(payload))
-
-if login_response.status_code == 200:
+# دالة لتحميل التوكن من الملف
+def load_token():
     try:
-        login_data = login_response.json()
-        if login_data.get("status") == "success":
-            print("Login successful!")
-            
-            # الآن قم بالبحث عن الحساب واتباعه
-            follow_payload = {
-                "id": "https://api.imvu.com/profile/profile-user-352763477"  # هنا يتم تحديد ID الحساب الذي سيتم متابعته
-            }
+        with open('token.json', 'r') as file:
+            data = json.load(file)
+            return data["token"]
+    except FileNotFoundError:
+        return None
 
-            # إرسال طلب فولو
-            follow_response = requests.post(BASE_URL_FOLLOW, headers=HEADERS, data=json.dumps(follow_payload))
-            
-            if follow_response.status_code == 201:
-                print("Successfully followed the user!")
-                print("Follow Response:", follow_response.json())
-            else:
-                print(f"Failed to follow the user. Status code: {follow_response.status_code}")
-                print("Response:", follow_response.text)
-            
-        elif login_data.get("status") == "failure":
-            print("Login failed. Details:", login_data)
+# دالة لتسجيل الدخول وجلب التوكن
+def login_and_get_token(username, password):
+    login_url = "https://api.imvu.com/login"
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    # بيانات تسجيل الدخول
+    data = {
+        "username": username,
+        "password": password
+    }
+
+    # إرسال الطلب لتسجيل الدخول
+    response = requests.post(login_url, json=data, headers=headers)
+
+    if response.status_code == 200:
+        # استخراج التوكن من الاستجابة
+        token = response.json().get("token")
+        if token:
+            save_token(token)  # حفظ التوكن بعد تسجيل الدخول
+            print("تم تسجيل الدخول بنجاح وحفظ التوكن")
+            return token
         else:
-            print("Unexpected status:", login_data)
-    except json.JSONDecodeError:
-        print("Failed to decode response JSON:", login_response.text)
-else:
-    print(f"Request failed with status code {login_response.status_code}")
-    print("Response:", login_response.text)
+            print("لم يتم العثور على التوكن في الاستجابة")
+            return None
+    else:
+        print(f"فشل تسجيل الدخول: {response.status_code}")
+        return None
+
+# دالة لتنفيذ الفولو باستخدام التوكن المحفوظ
+def follow_user(user_to_follow):
+    # تحميل التوكن المحفوظ
+    token = load_token()
+
+    if token:
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+
+        # بناء البيانات المطلوبة للفولو
+        data = {
+            "id": f"https://api.imvu.com/profile/{user_to_follow}"
+        }
+
+        # URL للفولو
+        url = "https://api.imvu.com/profile/profile-user-376547310/subscriptions?limit=50"
+
+        # إرسال طلب الفولو
+        response = requests.post(url, headers=headers, json=data)
+
+        if response.status_code == 201:
+            print("تمت متابعة المستخدم بنجاح")
+        else:
+            print(f"حدث خطأ: {response.status_code}")
+            print(response.json())
+    else:
+        print("التوكن غير موجود، يرجى تسجيل الدخول أولاً.")
+
+# استخدام الدوال في التطبيق
+username = "conq1@gmail.com"
+password = "Moammedmax2"
+
+# تسجيل الدخول وجلب التوكن
+token = login_and_get_token(username, password)
+
+# إذا كان التوكن موجودًا، نفذ الفولو
+if token:
+    follow_user("profile-user-352763477")  # استبدل بمعرف المستخدم الفعلي
