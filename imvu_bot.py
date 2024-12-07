@@ -60,10 +60,26 @@ def login(username, password):
 
 # دالة لمتابعة مستخدم
 def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
+    if not token or not sauce:
+        print("التوكن أو السورس غير صالح.")
+        return
+    
     headers = {
+        'Accept': 'application/json; charset=utf-8',
+        'Accept-Encoding': 'gzip, deflate, br, zstd',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': f'Bearer {token}',  # استخدام التوكن بشكل صحيح
+        'X-Imvu-Application': 'next_desktop/1',  # من الهيدر
         'X-Imvu-Sauce': sauce,  # استخدام sauce في الترويسة
-        'Content-Type': 'application/json',
-        'Cookie': f'osCsid={sid}; sncd={sn}; _imvu_avnm={nm}; browser_session={sess}; window_session={sess2}'
+        'Cookie': f'osCsid={sid}; sncd={sn}; _imvu_avnm={nm}; browser_session={sess}; window_session={sess2}',
+        'Origin': 'https://www.imvu.com',
+        'Referer': 'https://www.imvu.com/next/av/L7AJ/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
+        'Access-Control-Request-Headers': 'content-type,x-imvu-application,x-imvu-sauce',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Origin': 'https://www.imvu.com'
     }
 
     data = {
