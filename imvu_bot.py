@@ -25,73 +25,37 @@ def extract_cookies(cookies):
     
     return sid, sn, nm, sess, sess2
 
-def login_and_get_token(username, password):
-    login_url = "https://api.imvu.com/login"
-    headers = {
-        "Content-Type": "application/json"
-    }
+import requests
 
-    # بيانات تسجيل الدخول
+# دالة لتسجيل الدخول والحصول على التوكن و sauce
+def login(username, password):
+    url = "https://api.imvu.com/login"
     data = {
         "username": username,
         "password": password
     }
 
-    # إرسال الطلب لتسجيل الدخول
-    response = requests.post(login_url, json=data, headers=headers)
+    response = requests.post(url, data=data)
 
-    # طباعة الاستجابة كاملة لتشخيص الخطأ
-    print("استجابة تسجيل الدخول:", response.text)
-
-    # التحقق من الاستجابة
-    if response.status_code in [200, 201]:
-        try:
-            # استخراج التوكن من "denormalized"
-            response_data = response.json()
-            denormalized_data = response_data.get("denormalized", {})
-            
-            # استخراج المعرف الديناميكي من الاستجابة
-            login_id = list(denormalized_data.keys())[0]  # أخذ أول مفتاح في الـ "denormalized"
-            sauce = denormalized_data.get(login_id, {}).get("data", {}).get("sauce")
-            
-            if sauce:
-                # استخراج الكوكيز
-                cookies = response.cookies
-                sid, sn, nm, sess, sess2 = extract_cookies(cookies)
-                
-                # حفظ التوكن والكوكيز
-                save_token(sauce)
-                print(f"تم تسجيل الدخول بنجاح وحفظ التوكن: {sauce}")
-                return sauce, sid, sn, nm, sess, sess2
-            else:
-                print("لم يتم العثور على التوكن (sauce) في الاستجابة")
-                return None, None, None, None, None, None
-        except ValueError:
-            print("حدث خطأ أثناء قراءة الاستجابة كـ JSON")
-            return None, None, None, None, None, None
+    if response.status_code == 201:
+        # استخراج التوكن و sauce من الاستجابة
+        response_json = response.json()
+        sauce = response_json.get("denormalized", {}).get("data", {}).get("sauce")
+        token = response_json.get("id")  # أو قم باستخراج التوكن بالطريقة المناسبة حسب الاستجابة
+        if sauce and token:
+            print("تم تسجيل الدخول بنجاح")
+            return token, sauce
+        else:
+            print("لم يتم العثور على التوكن أو sauce في الاستجابة")
+            return None, None
     else:
-        print(f"فشل تسجيل الدخول: {response.status_code}")
-        return None, None, None, None, None, None
+        print(f"حدث خطأ في تسجيل الدخول: {response.status_code}")
+        return None, None
 
-def extract_cookies(cookies):
-    # استخراج الكوكيز
-    sid = cookies.get('osCsid')
-    sn = cookies.get('sncd')
-    nm = cookies.get('_imvu_avnm')
-    sess = cookies.get('browser_session')
-    sess2 = cookies.get('window_session')
-    
-    return sid, sn, nm, sess, sess2
-
-def save_token(token):
-    # حفظ التوكن في ملف أو قاعدة بيانات
-    with open("token.txt", "w") as token_file:
-        token_file.write(token)
-        
-# دالة لتنفيذ الفولو باستخدام التوكن والكوكيز
-def follow_user(user_to_follow, token, sid, sn, nm, sess, sess2):
+# دالة لمتابعة مستخدم
+def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
     headers = {
-        'Authorization': f'Bearer {token}',
+        'X-Imvu-Sauce': sauce,  # استخدام sauce في الترويسة
         'Content-Type': 'application/json',
         'Cookie': f'osCsid={sid}; sncd={sn}; _imvu_avnm={nm}; browser_session={sess}; window_session={sess2}'
     }
@@ -110,11 +74,22 @@ def follow_user(user_to_follow, token, sid, sn, nm, sess, sess2):
         print(f"حدث خطأ: {response.status_code}")
         print(response.json())
 
-# استخدام الدوال في التطبيق
+# مثال للاستخدام
 username = "conq1@gmail.com"
 password = "Moammedmax2"
+user_to_follow = "376547310"  # معرف المستخدم الذي تريد متابعته
 
-token, sid, sn, nm, sess, sess2 = login_and_get_token(username, password)
+# تسجيل الدخول للحصول على التوكن و sauce
+token, sauce = login(username, password)
 
-if token:
-    follow_user("profile-user-352763477", token, sid, sn, nm, sess, sess2)
+if token and sauce:
+    sid = "session_id_example"
+    sn = "sncd_example"
+    nm = "name_example"
+    sess = "browser_session_example"
+    sess2 = "window_session_example"
+    
+    # متابعة المستخدم بعد تسجيل الدخول
+    follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2)
+else:
+    print("فشل تسجيل الدخول، لم يتم متابعة المستخدم.")
