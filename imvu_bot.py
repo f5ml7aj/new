@@ -2,30 +2,50 @@ import requests
 import json
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 import time
 
-# إعدادات Firefox
+# إعدادات المتصفح
 options = Options()
-options.add_argument("--headless")  # لتشغيل المتصفح بدون واجهة
-options.add_argument("--no-sandbox")  # لتجنب مشاكل الصلاحيات
-
-# إنشاء جلسة Firefox
+options.add_argument("--headless")  # اختياري: تشغيل بدون واجهة
 driver = webdriver.Firefox(options=options)
 
-# فتح الصفحة المطلوبة
-url = 'https://www.imvu.com/next/av/L7AJ/'
-driver.get(url)
+try:
+    # فتح صفحة تسجيل الدخول
+    driver.get("https://secure.imvu.com/login/")
 
-# انتظر تحميل الصفحة
-time.sleep(5)
+    # العثور على حقول البريد الإلكتروني وكلمة المرور
+    email_field = driver.find_element(By.NAME, "username")
+    password_field = driver.find_element(By.NAME, "password")
 
-# استخراج الكوكيز
-cookies = driver.get_cookies()
-for cookie in cookies:
-    print(cookie)
+    # إدخال بيانات تسجيل الدخول
+    email = "conq1@gmail.com"
+    password = "Moammedmax2"      # استبدل هذا بكلمة مرورك
+    email_field.send_keys(email)
+    password_field.send_keys(password)
 
-# إغلاق المتصفح
-driver.quit()
+    # الضغط على زر تسجيل الدخول
+    password_field.send_keys(Keys.RETURN)
+
+    # الانتظار حتى يتم تسجيل الدخول
+    time.sleep(5)
+
+    # الانتقال إلى الصفحة المطلوبة
+    driver.get("https://www.imvu.com/next/av/L7AJ/")
+
+    # استخراج الكوكيز
+    cookies = driver.get_cookies()
+    for cookie in cookies:
+        print(cookie)
+
+    # إذا كنت تحتاج إلى محتوى الصفحة
+    print(driver.page_source)
+
+finally:
+    # إغلاق المتصفح
+    driver.quit()
+
 
 # دالة لحفظ التوكن في ملف
 def save_token(token):
