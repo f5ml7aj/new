@@ -1,5 +1,29 @@
 import requests
 import json
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+
+# إعدادات السيلينيوم
+options = webdriver.ChromeOptions()
+options.add_argument("--headless")  # إذا كنت لا تريد تشغيل المتصفح بشكل مرئي
+driver = webdriver.Chrome(options=options)
+
+# افتح صفحة الفولو
+driver.get('https://www.imvu.com/next/av/L7AJ/')  # استبدلها بعنوان URL الخاص بالصفحة
+
+# انتظر لبعض الوقت حتى يتم تحميل الكوكيز بشكل كامل
+time.sleep(5)  # يمكنك تعديل الوقت بناءً على سرعة تحميل الصفحة
+
+# استخراج الكوكيز
+cookies = driver.get_cookies()
+
+# طباعة الكوكيز للتأكد من الحصول عليها
+for cookie in cookies:
+    print(cookie)
+
+# إغلاق المتصفح
+driver.quit()
 
 # دالة لحفظ التوكن في ملف
 def save_token(token):
@@ -74,6 +98,7 @@ def get_cookies_from_page(url, headers):
         print("فشل في الحصول على الكوكيز")
         return None
 
+
 def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
     """
     دالة متابعة مستخدم مع معطيات إضافية مثل الـ session و الـ sid و الـ sn.
@@ -81,25 +106,29 @@ def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
     if not token or not sauce:
         print("التوكن أو السورس غير صالح.")
         return
-    
+        
+    cookie_header = '; '.join([f"{cookie['name']}={cookie['value']}" for cookie in cookies])
     # بناء الهيدرز
-    headers = {
-        'Accept': 'application/json; charset=utf-8',
-        'Accept-Encoding': 'gzip, deflate, br, zstd',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Content-Type': 'application/json; charset=utf-8',
-        'Authorization': f'Bearer {token}',
-        'X-Imvu-Application': 'next_desktop/1',
-        'X-Imvu-Sauce': sauce,
-        'Cookie': f"sid={sid}; sn={sn}; nm={nm}; sess={sess}; sess2={sess2}",  # إضافة الكوكيز المستخرجة هنا
-        'Origin': 'https://www.imvu.com',
-        'Referer': 'https://www.imvu.com/next/av/L7AJ/',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
-        'Access-Control-Request-Headers': 'content-type,x-imvu-application,x-imvu-sauce',
-        'Access-Control-Request-Method': 'POST',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': 'https://www.imvu.com'
-    }
+headers = {
+    'Accept': 'application/json; charset=utf-8',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Content-Type': 'application/json; charset=utf-8',
+    'Authorization': f'Bearer {token}',
+    'X-Imvu-Application': 'next_desktop/1',
+    'X-Imvu-Sauce': sauce,
+    'Cookie': cookie_header,  # تضمين جميع الكوكيز هنا
+    'Origin': 'https://www.imvu.com',
+    'Referer': 'https://www.imvu.com/next/av/L7AJ/',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
+    'Access-Control-Request-Headers': 'content-type,x-imvu-application,x-imvu-sauce',
+    'Access-Control-Request-Method': 'POST',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Origin': 'https://www.imvu.com'
+}
+
+# الآن يمكنك متابعة المستخدم باستخدام الكوكيز الجديدة في الهيدر
+response = requests.post(url, headers=headers, json=data)
 
     data = {
         "id": f"https://api.imvu.com/profile/{user_to_follow}"
