@@ -1,15 +1,3 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.firefox import GeckoDriverManager
-from selenium.webdriver.common.action_chains import ActionChains
-from PIL import Image, ImageDraw
-import requests
-import json
-
 import requests
 import json
 
@@ -51,6 +39,8 @@ def login_and_get_token(username, password):
         try:
             # استخراج التوكن من "denormalized"
             response_data = response.json()
+            print("الاستجابة JSON:", json.dumps(response_data, indent=4))  # طباعة الاستجابة بشكل منسق
+
             denormalized_data = response_data.get("denormalized", {})
             
             # إذا كان هناك بيانات في "denormalized"
@@ -115,4 +105,3 @@ token = login_and_get_token(username, password)
 # إذا كان التوكن موجودًا، نفذ الفولو
 if token:
     follow_user("profile-user-352763477")  # استبدل بمعرف المستخدم الفعلي
-
