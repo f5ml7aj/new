@@ -10,7 +10,6 @@ from PIL import Image, ImageDraw
 import requests
 import json
 
-# تحديد المتغيرات الأساسية
 import requests
 import json
 
@@ -44,15 +43,22 @@ def login_and_get_token(username, password):
     # إرسال الطلب لتسجيل الدخول
     response = requests.post(login_url, json=data, headers=headers)
 
+    # طباعة الاستجابة كاملة لتشخيص الخطأ
+    print("استجابة تسجيل الدخول:", response.text)
+
     if response.status_code == 200:
-        # استخراج التوكن من الاستجابة
-        token = response.json().get("token")
-        if token:
-            save_token(token)  # حفظ التوكن بعد تسجيل الدخول
-            print("تم تسجيل الدخول بنجاح وحفظ التوكن")
-            return token
-        else:
-            print("لم يتم العثور على التوكن في الاستجابة")
+        # استخراج التوكن من الاستجابة إذا كان موجودًا
+        try:
+            token = response.json().get("token")
+            if token:
+                save_token(token)  # حفظ التوكن بعد تسجيل الدخول
+                print("تم تسجيل الدخول بنجاح وحفظ التوكن")
+                return token
+            else:
+                print("لم يتم العثور على التوكن في الاستجابة")
+                return None
+        except ValueError:
+            print("حدث خطأ أثناء قراءة الاستجابة كـ JSON")
             return None
     else:
         print(f"فشل تسجيل الدخول: {response.status_code}")
@@ -98,3 +104,4 @@ token = login_and_get_token(username, password)
 # إذا كان التوكن موجودًا، نفذ الفولو
 if token:
     follow_user("profile-user-352763477")  # استبدل بمعرف المستخدم الفعلي
+
