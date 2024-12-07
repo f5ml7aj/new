@@ -66,7 +66,7 @@ def follow_user(user_to_follow):
 
     if token:
         headers = {
-            'Authorization': f'Bearer {token}',
+            'Authorization': f'Bearer {token}',  # تأكد من تضمين التوكن هنا
             'Content-Type': 'application/json',
         }
 
@@ -88,7 +88,7 @@ def follow_user(user_to_follow):
             print(response.json())
     else:
         print("التوكن غير موجود، يرجى تسجيل الدخول أولاً.")
-
+        
 # استخدام الدوال في التطبيق
 username = "conq1@gmail.com"
 password = "Moammedmax2"
