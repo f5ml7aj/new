@@ -1,24 +1,26 @@
 import requests
 import json
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
 import time
 
-# إعدادات السيلينيوم
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")  # إذا كنت لا تريد تشغيل المتصفح بشكل مرئي
-driver = webdriver.Chrome(options=options)
+# إعدادات Firefox
+options = Options()
+options.add_argument("--headless")  # لتشغيل المتصفح بدون واجهة
+options.add_argument("--no-sandbox")  # لتجنب مشاكل الصلاحيات
 
-# افتح صفحة الفولو
-driver.get('https://www.imvu.com/next/av/L7AJ/')  # استبدلها بعنوان URL الخاص بالصفحة
+# إنشاء جلسة Firefox
+driver = webdriver.Firefox(options=options)
 
-# انتظر لبعض الوقت حتى يتم تحميل الكوكيز بشكل كامل
-time.sleep(5)  # يمكنك تعديل الوقت بناءً على سرعة تحميل الصفحة
+# فتح الصفحة المطلوبة
+url = 'https://www.imvu.com/next/av/L7AJ/'
+driver.get(url)
+
+# انتظر تحميل الصفحة
+time.sleep(5)
 
 # استخراج الكوكيز
 cookies = driver.get_cookies()
-
-# طباعة الكوكيز للتأكد من الحصول عليها
 for cookie in cookies:
     print(cookie)
 
