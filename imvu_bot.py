@@ -56,23 +56,42 @@ def login(username, password):
     else:
         print(f"حدث خطأ في تسجيل الدخول: {response.status_code}")
         return None, None
+import requests
 
+def get_cookies_from_page(url, headers):
+    """
+    جلب الكوكيز من صفحة معينة.
+    """
+    session = requests.Session()
+    response = session.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        # استخراج الكوكيز من الاستجابة
+        cookies = session.cookies.get_dict()
+        print("تم الحصول على الكوكيز بنجاح")
+        return cookies
+    else:
+        print("فشل في الحصول على الكوكيز")
+        return None
 
-# دالة لمتابعة مستخدم
-def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
+def follow_user(user_to_follow, token, sauce, cookies):
+    """
+    عملية متابعة مستخدم مع استخدام الكوكيز المستخرجة.
+    """
     if not token or not sauce:
         print("التوكن أو السورس غير صالح.")
         return
     
+    # بناء الهيدرز
     headers = {
         'Accept': 'application/json; charset=utf-8',
         'Accept-Encoding': 'gzip, deflate, br, zstd',
         'Accept-Language': 'en-US,en;q=0.5',
         'Content-Type': 'application/json; charset=utf-8',
-        'Authorization': f'Bearer {token}',  # استخدام التوكن بشكل صحيح
-        'X-Imvu-Application': 'next_desktop/1',  # من الهيدر
-        'X-Imvu-Sauce': sauce,  # استخدام sauce في الترويسة
-        'Cookie': f'osCsid={sid}; sncd={sn}; _imvu_avnm={nm}; browser_session={sess}; window_session={sess2}',
+        'Authorization': f'Bearer {denormalized}',
+        'X-Imvu-Application': 'next_desktop/1',
+        'X-Imvu-Sauce': sauce,
+        'Cookie': '; '.join([f'{key}={value}' for key, value in cookies.items()]),  # إضافة الكوكيز المستخرجة
         'Origin': 'https://www.imvu.com',
         'Referer': 'https://www.imvu.com/next/av/L7AJ/',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
@@ -88,6 +107,7 @@ def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
 
     url = "https://api.imvu.com/profile/profile-user-376547310/subscriptions?limit=50"
 
+    # إرسال طلب متابعة المستخدم
     response = requests.post(url, headers=headers, json=data)
 
     if response.status_code == 201:
@@ -95,6 +115,15 @@ def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
     else:
         print(f"حدث خطأ: {response.status_code}")
         print(response.json())
+
+# مثال على كيفية استخدام الكود
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
+}
+
+# استبدال URL صفحة الفولو بـ URL الفعلي الذي تحتاجه
+url_to_follow_page = "https://www.imvu.com/next/av/L7AJ/"
+cookies = get_cookies_from_page(url_to_follow_page, headers)
 
 # مثال للاستخدام
 username = "conq1@gmail.com"
