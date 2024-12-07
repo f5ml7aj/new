@@ -50,31 +50,43 @@ def login_and_get_token(username, password):
             response_data = response.json()
             denormalized_data = response_data.get("denormalized", {})
             
-            if denormalized_data:
-                login_data = denormalized_data.get("https://api.imvu.com/login", {})
-                sauce = login_data.get("data", {}).get("sauce")
+            # استخراج المعرف الديناميكي من الاستجابة
+            login_id = list(denormalized_data.keys())[0]  # أخذ أول مفتاح في الـ "denormalized"
+            sauce = denormalized_data.get(login_id, {}).get("data", {}).get("sauce")
+            
+            if sauce:
+                # استخراج الكوكيز
+                cookies = response.cookies
+                sid, sn, nm, sess, sess2 = extract_cookies(cookies)
                 
-                if sauce:
-                    # استخراج الكوكيز
-                    cookies = response.cookies
-                    sid, sn, nm, sess, sess2 = extract_cookies(cookies)
-                    
-                    # حفظ التوكن والكوكيز
-                    save_token(sauce)
-                    print(f"تم تسجيل الدخول بنجاح وحفظ التوكن: {sauce}")
-                    return sauce, sid, sn, nm, sess, sess2
-                else:
-                    print("لم يتم العثور على التوكن (sauce) في الاستجابة")
-                    return None, None, None, None, None, None
+                # حفظ التوكن والكوكيز
+                save_token(sauce)
+                print(f"تم تسجيل الدخول بنجاح وحفظ التوكن: {sauce}")
+                return sauce, sid, sn, nm, sess, sess2
             else:
-                print("لم يتم العثور على بيانات denormalized في الاستجابة")
+                print("لم يتم العثور على التوكن (sauce) في الاستجابة")
                 return None, None, None, None, None, None
         except ValueError:
             print("حدث خطأ أثناء قراءة الاستجابة كـ JSON")
             return None, None, None, None, None, None
     else:
         print(f"فشل تسجيل الدخول: {response.status_code}")
-        return None, None, None, None, None, None 
+        return None, None, None, None, None, None
+
+def extract_cookies(cookies):
+    # استخراج الكوكيز
+    sid = cookies.get('osCsid')
+    sn = cookies.get('sncd')
+    nm = cookies.get('_imvu_avnm')
+    sess = cookies.get('browser_session')
+    sess2 = cookies.get('window_session')
+    
+    return sid, sn, nm, sess, sess2
+
+def save_token(token):
+    # حفظ التوكن في ملف أو قاعدة بيانات
+    with open("token.txt", "w") as token_file:
+        token_file.write(token)
         
 # دالة لتنفيذ الفولو باستخدام التوكن والكوكيز
 def follow_user(user_to_follow, token, sid, sn, nm, sess, sess2):
