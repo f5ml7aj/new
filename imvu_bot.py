@@ -39,31 +39,25 @@ def login_and_get_token(username, password):
         try:
             # استخراج التوكن من "denormalized"
             response_data = response.json()
-            print("الاستجابة JSON:", json.dumps(response_data, indent=4))  # طباعة الاستجابة بشكل منسق
-
             denormalized_data = response_data.get("denormalized", {})
-            
-            # إذا كان هناك بيانات في "denormalized"
-            if denormalized_data:
-                # استخراج التوكن (sauce) من البيانات
-                sauce = denormalized_data.get("https://api.imvu.com/login", {}).get("data", {}).get("sauce")
+
+            # البحث عن التوكن داخل الـ "denormalized" باستخدام المفتاح المتغير
+            for key, value in denormalized_data.items():
+                sauce = value.get("data", {}).get("sauce")
                 
                 if sauce:
                     save_token(sauce)  # حفظ التوكن بعد تسجيل الدخول
                     print("تم تسجيل الدخول بنجاح وحفظ التوكن")
                     return sauce
-                else:
-                    print("لم يتم العثور على التوكن (sauce) في الاستجابة")
-                    return None
-            else:
-                print("لم يتم العثور على بيانات denormalized في الاستجابة")
-                return None
+            print("لم يتم العثور على التوكن (sauce) في الاستجابة")
+            return None
         except ValueError:
             print("حدث خطأ أثناء قراءة الاستجابة كـ JSON")
             return None
     else:
         print(f"فشل تسجيل الدخول: {response.status_code}")
         return None
+
 
 # دالة لتنفيذ الفولو باستخدام التوكن المحفوظ
 def follow_user(user_to_follow):
