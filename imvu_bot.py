@@ -38,7 +38,9 @@ def login(username, password):
     response = requests.post(url, data=data)
 
     if response.status_code == 201:
-        # استخراج التوكن و sauce من الاستجابة
+        # طباعة الاستجابة الكاملة للتحقق من تنسيق البيانات
+        print("استجابة تسجيل الدخول:", response.json())
+        
         response_json = response.json()
         sauce = response_json.get("denormalized", {}).get("data", {}).get("sauce")
         token = response_json.get("id")  # أو قم باستخراج التوكن بالطريقة المناسبة حسب الاستجابة
@@ -51,6 +53,7 @@ def login(username, password):
     else:
         print(f"حدث خطأ في تسجيل الدخول: {response.status_code}")
         return None, None
+
 
 # دالة لمتابعة مستخدم
 def follow_user(user_to_follow, token, sauce, sid, sn, nm, sess, sess2):
